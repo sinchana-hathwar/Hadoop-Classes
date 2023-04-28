@@ -1,0 +1,36 @@
+hive
+
+show databases;  #Shows all the existing databases
+
+create database if not exists bda; #create a new database bda, if bda already exists, hive will ignore this command
+
+Use bda; # use database
+
+## Internal tables
+create table if not exists emp(empno int, ename string, sal float, dpno int) row format delimited fields terminated by ',’; #row format delimited implies a new line, whenever encountered will be treated as new row and fields are separated by commas
+describe emp;
+load data local inpath '/home/cloudera/Desktop/emp.csv' into table emp;
+Select * from emp;
+
+## External tables
+#Method one
+External Tables
+create external table  ext_emp1(empno int, ename string, sal float, dpno int) row format delimited fields terminated by ',’ location '/user/data’;
+# table will be in given hdfs path
+
+#Method two
+create external table  ext_emp2(empno int, ename string, sal float, dpno int) row format delimited fields terminated by ‘,’;
+#Table will be stored under /user/hive/warehouse/bda.db/ext_emp2
+
+load data local inpath '/home/sinchana/hadoopdata/empdata.csv' into table ext_emp2;
+
+##Partitioning
+set hive.exec.dynamic.partition.mode;
+set hive.exec.dynamic.partition.mode=nonstrict;
+
+create external table part_table (empno int, ename string, sal float) partitioned by (dpno int) row format delimited fields terminated by ',’;
+insert into table part_table partition(dpno) select * from emp;
+
+#Check
+
+hadoop fs -ls /user/hive/warehouse/bda.db
