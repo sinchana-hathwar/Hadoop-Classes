@@ -1,0 +1,29 @@
+# Copy files to read
+hadoop fs -copy /home/sinchana/hadoopdata/empdata.csv /user/data/pig/emp.csv 
+
+# Load Data
+A = load '/user/data/pig/empdata.csv' using PigStorage(',') as (eid:int,ename:chararray,epos:chararray,esal:int,edpno:int);
+Dump A;
+
+# Loading data without a schema
+A2 = load '/user/data/pig/emp.csv’;
+describe A2;
+
+# Aggregating by row and saving in another file
+B = filter A by edpno==20;
+B2 = filter A by edpno==20 and epos=='MANAGER’,
+C = limit B 3;
+D = order C by esal desc;
+
+# Store Data
+store D into '/pig/pigout1’ using PigStorage(',’);
+
+# Transformations by column
+# Select existing column
+E = foreach A generate eid;
+
+# Create new column
+F = foreach A generate *, esal*2 as Bonus,esal*5 as Incentive;
+
+# Transform columns
+G = foreach A generate SUBSTRING(ename,0,4);
